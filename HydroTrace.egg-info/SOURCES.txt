@@ -1,0 +1,16 @@
+MANIFEST.in
+README.MD
+README.md
+setup.py
+HydroTrace/__init__.py
+HydroTrace/hydro_trace_common.py
+HydroTrace/main.py
+HydroTrace.egg-info/PKG-INFO
+HydroTrace.egg-info/SOURCES.txt
+HydroTrace.egg-info/dependency_links.txt
+HydroTrace.egg-info/requires.txt
+HydroTrace.egg-info/top_level.txt
+HydroTrace/meta/InstitutionLogo.png
+HydroTrace/meta/__init__.py
+HydroTrace/meta/icon.png
+HydroTrace/meta/logo.png
