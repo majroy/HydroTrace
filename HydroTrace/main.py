@@ -10,7 +10,7 @@ __email__ = "matthew.roy@manchester.ac.uk"
 __status__ = "Experimental"
 __copyright__ = "(c) M. J. Roy, 2019-2020"
 
-import sys, os.path, shutil
+import os,io,sys,time,yaml
 import subprocess as sp
 from pkg_resources import Requirement, resource_filename
 import numpy as np
@@ -54,8 +54,13 @@ class HT_main_window(object):
         pixmap.scaledToWidth(20)
         image.setPixmap(pixmap)
         image.show()
+        self.settingsButton = QtWidgets.QPushButton('Settings')
         self.mainLayout.addWidget(horizLine)
-        self.mainLayout.addWidget(image)
+        footerLayout = QtWidgets.QHBoxLayout()
+        footerLayout.addWidget(image)
+        footerLayout.addStretch()
+        footerLayout.addWidget(self.settingsButton)
+        self.mainLayout.addLayout(footerLayout)
         
         #populate ttl tab
         
@@ -86,9 +91,9 @@ class HT_main_window(object):
         self.reloadButton = QtWidgets.QPushButton('Load')
         self.calcButton = QtWidgets.QPushButton('Calculate')
         
-        labels = ['Hydrogen standard gas content (ppm):', 'Hydrogen standard peak area:','Sample weight (g):','Gas flow rate during test (mL/min):','Cycle time of individual run (min):']
-        self.content = QtWidgets.QDoubleSpinBox()
-        self.content.setValue(61)
+        
+        labels = ['Hydrogen standard peak area:','Sample weight (g):','Gas flow rate during test (mL/min):','Cycle time of individual run (min):']
+
         self.spa = QtWidgets.QDoubleSpinBox()
         self.spa.setMaximum(10000000)
         self.spa.setMinimum(0)
@@ -104,18 +109,17 @@ class HT_main_window(object):
         
         mainUiBox.addWidget(self.reloadButton,0,0,1,1)
         mainUiBox.addWidget(self.calcButton,0,1,1,1)
-        for i in range(0,5):
+        for i in range(0,4):
             mainUiBox.addWidget(QtWidgets.QLabel(labels[i]),2+i,0,1,1)
         
-        mainUiBox.addWidget(self.content,2,1,1,1)
-        mainUiBox.addWidget(self.spa,3,1,1,1)
-        mainUiBox.addWidget(self.weight,4,1,1,1)
-        mainUiBox.addWidget(self.rate,5,1,1,1)
-        mainUiBox.addWidget(self.cycletime,6,1,1,1)
-        mainUiBox.addWidget(horizLine1,7,0,1,2)
-        mainUiBox.addWidget(QtWidgets.QLabel("Result (ppm)"),8,0,1,1)
-        mainUiBox.addWidget(self.result,8,1,1,1)
-        mainUiBox.addWidget(self.statLabel,9,0,1,2)
+        mainUiBox.addWidget(self.spa,2,1,1,1)
+        mainUiBox.addWidget(self.weight,3,1,1,1)
+        mainUiBox.addWidget(self.rate,4,1,1,1)
+        mainUiBox.addWidget(self.cycletime,5,1,1,1)
+        mainUiBox.addWidget(horizLine1,6,0,1,2)
+        mainUiBox.addWidget(QtWidgets.QLabel("Result (ppm)"),7,0,1,1)
+        mainUiBox.addWidget(self.result,7,1,1,1)
+        mainUiBox.addWidget(self.statLabel,8,0,1,2)
         
         ttlmainlayout = QtWidgets.QHBoxLayout()
         
@@ -127,6 +131,7 @@ class HT_main_window(object):
         plt_layout = QVBoxLayout()
         plt_layout.addWidget(self.canvas)
         plt_layout.addWidget(self.toolbar)
+        # plt_layout.addWidget(self.statLabel)
         
         ttlmainlayout.addLayout(mainUiBox)
         ttlmainlayout.addLayout(plt_layout)
@@ -139,15 +144,33 @@ class HT_main_window(object):
         #connections
         self.reloadButton.clicked.connect(lambda: self.get_input_data())
         self.calcButton.clicked.connect(lambda: self.calc())
-
-        self.content.valueChanged.connect(self.onValueChanged)
+        
         self.spa.valueChanged.connect(self.onValueChanged)
         self.weight.valueChanged.connect(self.onValueChanged)
         self.rate.valueChanged.connect(self.onValueChanged)
         self.cycletime.valueChanged.connect(self.onValueChanged)
 
+        #load standards
+        try:
+            self.filec = resource_filename("HydroTrace","HydroTraceSettings.yml")
+        except:
+            print("Did not find config file in the pyCM installation directory.")
+        try:
+            with open(self.filec,'r') as ymlfile:
+                cfg = yaml.load(ymlfile, Loader=yaml.FullLoader) 
+        except:
+            try:
+                cfg= get_config([61.0,7.44],self.filec)
+            except Exception as e:
+                print(e)
+                sys.exit("Failed to set config file. Quitting.")
+        self.content = float(cfg['FlowSettings']['content'])
+        self.flowconst = float(cfg['FlowSettings']['molar_rate'])
+        self.settingsButton.clicked.connect(lambda: get_config([self.content,self.flowconst],self.filec))
+        
     def get_input_data(self):
-    
+        
+        
         filep,startdir=get_file('*.txt')
         if filep is None:
             return
@@ -165,9 +188,9 @@ class HT_main_window(object):
         
         if hasattr(self,'area'):
             if self.area.any() != None:
-                ans = calc_total(self.content.value(),self.spa.value(),self.weight.value(),
-                    7.44e-6,self.rate.value(),self.cycletime.value(),self.area)
-                self.result.setText(str(ans))
+                ans = calc_total(self.content, self.spa.value(),self.weight.value(),
+                    self.flowconst,self.rate.value(),self.cycletime.value(),self.area)
+                self.result.setText("%0.4f"%ans)
                 
                 #plot
                 self.figure.clear()
@@ -185,7 +208,38 @@ class HT_main_window(object):
     
     def onValueChanged(self):
         self.result.setText("Undefined")
-        
+
+    def keyPressEvent(self, event):
+        if type(event) == QtGui.QKeyEvent:
+            print(event.key)
+
+    # def keyPressEvent(self, event):
+        # if event.key() == QtCore.Qt.Key_Return:
+            # print("keypress")
+            # self.cfg=GetFEAconfig([y, 1, 4],"file")
+        # event.accept()
+
+def get_config(inputlist,filec):
+    '''
+    Creates a GUI window to let the user specify FEA executable paths and writes them to a config file. Reads configs.
+    '''
+    print(inputlist)
+    get_config_dialog = QtWidgets.QDialog()
+    dui = Ui_get_config_dialog()
+    dui.setupUi(get_config_dialog)
+    dui.H_std_content.setValue(inputlist[0])
+    dui.Carrier_gas_molar_rate.setValue(inputlist[1])
+    dui.file_loc.setText(filec)
+
+    get_config_dialog.exec_()
+    # getFEAconfigDialog.show()
+
+    # try:
+        # with open(filec,'r') as ymlfile:
+            # return yaml.load(ymlfile, Loader=yaml.FullLoader)
+    # except:
+        # print("Couldn't read config file for some reason.")
+
 if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
     spl_fname=resource_filename("HydroTrace","meta/logo.png")

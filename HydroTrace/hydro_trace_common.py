@@ -10,7 +10,7 @@ __email__ = "matthew.roy@manchester.ac.uk"
 __status__ = "Experimental"
 __copyright__ = "(c) M. J. Roy, 2019-2020"
 
-import sys, os.path, shutil
+import sys, os.path, shutil, yaml
 import subprocess as sp
 from pkg_resources import Requirement, resource_filename
 import numpy as np
@@ -76,11 +76,11 @@ def read_cs_file(fname):
 
 def calc_total(hsc,std_pa,w,cgas,frate,ctime,area):
     """
-    With H std content(hsc), H std peak area (std_pa), weight(w), carrier gas (cgas)
-    flow rate (frate), cycle time (ctime) and area (from read_cs_file) returns
+    With H std content in ppm(hsc), H std peak area (std_pa), weight in g(w), carrier gas µmol/s (cgas),
+    flow rate in mL/min (frate), cycle time in min (ctime) and area (from read_cs_file) returns
     total hydrogen content in ppm.
     """
-    return np.sum((hsc*frate*cgas*ctime*12/(std_pa*w))*area)
+    return np.sum((hsc*frate*(cgas*1e-6)*ctime*12/(std_pa*w))*area)
     # return (hsc*1e-6)*(area[0]/std_pa)*((frate/10)*cgas)*(1e6)/w*2*60
 
 def get_file(*args):
@@ -106,9 +106,53 @@ def get_file(*args):
         return filer[0], os.path.dirname(filer[0])
 
 
-# fname = r"..\exampledata\ChemStationSample.txt"
-# int_run,area,_ = read_cs_file(fname)
-# ans = calc_total(61,86485,5,7.44e-6,20,2.3,area)
-# print(ans)
-# np.savetxt('test.out', area)
+class Ui_get_config_dialog(object):
+    """
+    Generates the pop-up window to manage default settings
+    """
+    def setupUi(self, get_config_dialog):
+        # getFEAconfigDialog.resize(200, 200)
+        get_config_dialog.setWindowTitle('Standard settings')
+        get_config_dialog.setWindowIcon(QIcon(resource_filename("HydroTrace","meta/icon.png")))
+        layout = QGridLayout(get_config_dialog)
+        self.pushButton = QPushButton('Update')
+        H_std_content_label = QLabel("Hydrogen standard content (ppm):")
+        self.H_std_content=QDoubleSpinBox(get_config_dialog)
+        Carrier_gas_molar_rate_label = QLabel("Carrier gas molar flow rate (µmol/s):")
+        self.Carrier_gas_molar_rate=QDoubleSpinBox(get_config_dialog)
+        
+        self.file_loc = QLabel(get_config_dialog)
+        self.file_loc.setFont(QFont("Helvetica",italic=True))
+        self.file_loc.setWordWrap(True)
+        
+        layout.addWidget(H_std_content_label,0,0,1,1)
+        layout.addWidget(self.H_std_content,0,1,1,1)
+        layout.addWidget(Carrier_gas_molar_rate_label,1,0,1,1)
+        layout.addWidget(self.Carrier_gas_molar_rate,1,1,1,1)
+        
+        
+        
+        layout.addWidget(self.pushButton,2,1,1,1)
+        layout.addWidget(self.file_loc,3,0,1,2)
+        
+        self.pushButton.clicked.connect(lambda: self.make_config_change(get_config_dialog))
+
+
+    def make_config_change(self, get_config_dialog):
+        try:
+            data= dict(FlowSettings = 
+            dict( 
+            content = self.H_std_content.value(), #61.00
+            molar_rate = self.Carrier_gas_molar_rate.value() #7.44e-6
+            )
+            )
+            print(data)
+            with open(str(self.file_loc.text()), 'w') as outfile:
+                yaml.dump(data, outfile, default_flow_style=False)
+        except Exception as e:
+            print(e)
+            print("Configuration change failed.")
+            
+
+        get_config_dialog.close()
 

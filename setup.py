@@ -22,7 +22,7 @@ setup(name = 'HydroTrace',
         'Natural Language :: English',
         ],
 
-    install_requires=['vtk>=6.0','numpy','scipy','pyyaml>=5.0','matplotlib','PyQt5'],
+    install_requires=['numpy','scipy','pyyaml>=5.0','matplotlib','PyQt5>=5.13'],
     license = 'Creative Commons Attribution-Noncommercial-Share Alike license',
     keywords = 'Hydrogen, Trace, Curve-fit',
     packages=['HydroTrace', 'HydroTrace.meta'],
