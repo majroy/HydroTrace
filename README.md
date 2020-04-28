@@ -1,6 +1,14 @@
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](http://www.gnu.org/licenses/gpl-3.0) 
 
 <span>![<span>Main Window</span>](HydroTrace/meta/logo.png)</span>
+- [Background](#background)
+- [Installation](#installation)
+- [Graphical interface](#graphical-interface)
+  * [Calculating total hydrogen content](#calculating-total-hydrogen-content)
+  * [Generating desorbtion vs. temperature data](#generating-desorbtion-vs-temperature-data)
+- [Functions to support batch processing](#functions-to-support-batch-processing)
+- [Further information](#further-information)
+
 # Background
 In order to address several shortcomings with ensuring similitude in examining the output from commercial hydrogen analysers, a modest suite of tools written with freely available Python 3 libraries has been developed to perform basic analyses. This consists of several high-level functions that can be accessed directly from interactive Python, as well as a Graphical User Interface (GUI) to use/demonstrate them.
 
@@ -11,8 +19,7 @@ Analysis requires two data files with the format exemplified, one stemming from 
 * Enable extentions to batch processing of hydrogren desorbtion curves and modelling efforts.
 
 # Installation
-Using `pip`, either install directly from the `*.tar.gz` archive available in `/~dist`, or through PyPI:
-The function can be called from interactive Python according to:
+Using `pip`, either install directly from the `*.tar.gz` archive available in `/~dist` (potentially for local installations to Anaconda), or from PyPI directly:
 ~~~
 >pip install HydroTrace
 ~~~
@@ -46,12 +53,13 @@ The temperature vs. time plot will show raw data from the datalogger and points 
 
 The merged records can be exported by clicking the `Export` button, whereby the data will be written in a comma separated format file, with a single header line describing the columns.
 
-## Functions for command line processing
-To access the underlying functions, import them from HydroTrace according to:
+# Functions to support batch processing
+
+To access the underlying functions employed by the GUI, import them from HydroTrace according to:
 ~~~
 >>>from HydroTrace.hydro_trace_common import *
 ~~~
-where * is one of the following:
+where * is one or more of the following:
 
 Function | Description
 ---  |---
