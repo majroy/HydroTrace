@@ -220,15 +220,18 @@ class HT_main_window(object):
         try:
             with open(self.filec,'r') as ymlfile:
                 cfg = yaml.load(ymlfile, Loader=yaml.FullLoader) 
-        except Exception as e:
-            print('Failed load',e)
+                self.content = float(cfg['FlowSettings']['content'])
+                self.flowconst = float(cfg['FlowSettings']['molar_rate'])
+        except:
+            #run once
             try:
-                cfg= get_config([61.0,7.44],self.filec)
+                self.content = 61
+                self.flowconst =  7.44
+                cfg= get_config([self.content,self.flowconst],self.filec)
+                
             except Exception as e:
                 print(e)
                 sys.exit("Failed to set config file. Quitting.")
-        self.content = float(cfg['FlowSettings']['content'])
-        self.flowconst = float(cfg['FlowSettings']['molar_rate'])
         self.settingsButton.clicked.connect(lambda: get_config([],self.filec))
         
     def get_input_temp_data(self):

@@ -1,8 +1,8 @@
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](http://www.gnu.org/licenses/gpl-3.0) 
 
 <span>![<span>Main Window</span>](HydroTrace/meta/logo.png)</span>
-
-In order to address several shortcomings with ensuring similitude in examining the output from commercial hydrogen analysers, a modest suite of tools has been developed to perform basic analysis. This consists of several high-level functions that can be accessed directly from interactive Python, as well as a Graphical User Interface to access them.
+# Background
+In order to address several shortcomings with ensuring similitude in examining the output from commercial hydrogen analysers, a modest suite of tools written with freely available Python 3 libraries has been developed to perform basic analyses. This consists of several high-level functions that can be accessed directly from interactive Python, as well as a Graphical User Interface (GUI) to use/demonstrate them.
 
 Analysis requires two data files with the format exemplified, one stemming from a temperature data acquisition device and the second from a Chem Station-type gas chromotographer. HydroTrace has been specifically developed to merge these records along with other experimental settings to provide:
 
@@ -10,11 +10,17 @@ Analysis requires two data files with the format exemplified, one stemming from 
 * Provide desorbtion versus temperature records; and
 * Enable extentions to batch processing of hydrogren desorbtion curves and modelling efforts.
 
-## Installation
-Using `pip`, either install directly from the `*.whl` available in dist, or through PyPI:
+# Installation
+Using `pip`, either install directly from the `*.tar.gz` archive available in `/~dist`, or through PyPI:
 The function can be called from interactive Python according to:
 ~~~
 >pip install HydroTrace
+~~~
+
+# Graphical interface
+Once installed, the graphical interface can be launched with:
+~~~
+>python -m HydroTrace.main
 ~~~
 
 ## Calculating total hydrogen content
@@ -54,3 +60,7 @@ Function | Description
 `interp_datetime(dt0,d0,dt1)` | *Parameters*: `dt0` and `d0` are incoming list of datetime objects and values, respectively. `dtl` is a list of datetimes within the range captured by `dt0`. *Returns*: `fdtl`: numpy array, `dtl_mdates`: numpy array. `fdtl` is interpolated values corresponding to input datetimes `dt1`, `dtl_mdates` is an array of matplotlib mdate values corresponding to `dtl` for plotting purposes.
 `calc_total(hsc,std_pa,w,cgas,frate,ctime,area)` | *Parameters*: H std content in ppm (`hsc`), H std peak area (`std_pa`), weight in g (`w`), carrier gas µmol/s (`cgas`), flow rate in mL/min (`frate`), cycle time in min (`ctime`) - all float values and area (numpy array from `read_cs_file`). *Returns*: `content` as float.
 `calc_desorbtion_rate(hsc,std_pa,w,cgas,frate,area)` | *Parameters*: H std content in ppm (`hsc`), H std peak area (`std_pa`), weight in g (`w`), carrier gas µmol/s (`cgas`), flow rate in mL/min (`frate`), - all float values and area (numpy array from `read_cs_file`). *Returns*: `rates` as numpy array.
+
+# Further information
+
+This application has been developed in support of activities conducted at the Royce Institute at the University of Manchester. Please see LICENSE for further details.
