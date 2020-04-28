@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 
 
 setup(name = 'HydroTrace',
-    version = '0.1',
+    version = '0.2',
     description = 'Hydrogen Trace Analysis Suite',
     long_description = 'https://github.com/majroy/HydroTrace',
     url = 'https://github.com/majroy/HydroTrace',
