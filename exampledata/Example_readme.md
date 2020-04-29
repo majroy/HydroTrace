@@ -1,3 +1,5 @@
+The data included was generated from commercially available 7xxx series Al alloy, with an ISO-defined standard.
+
 Constants to recreate analysis:
 
 * Hydrogen standard content (Settings): 61

@@ -12,14 +12,14 @@
 # Background
 In order to address several shortcomings with ensuring similitude in examining the output from commercial hydrogen analysers, a modest suite of tools written with freely available Python 3 libraries has been developed to perform basic analyses. This consists of several high-level functions that can be accessed directly from interactive Python, as well as a Graphical User Interface (GUI) to use/demonstrate them.
 
-Analysis requires two data files with the format exemplified, one stemming from a temperature data acquisition device and the second from a Chem Station-type gas chromotographer. HydroTrace has been specifically developed to merge these records along with other experimental settings to provide:
+Analysis requires two data files with the format exemplified, one stemming from a temperature data acquisition device and the second exported from Agilent gas chromotographer data aquisition software, ChemStation. HydroTrace has been specifically developed to merge these records along with other experimental settings to provide:
 
 * Calculate the total hydrogen content;
 * Provide desorbtion versus temperature records; and
 * Enable extentions to batch processing of hydrogren desorbtion curves and modelling efforts.
 
 # Installation
-Using `pip`, either install directly from the `*.tar.gz` archive available in `/~dist` (potentially for local installations to Anaconda), or from PyPI directly:
+Using `pip`, either install directly from the `*.tar.gz` archive available in `~/dist` (potentially for local installations to Anaconda), or from PyPI directly:
 ~~~
 >pip install HydroTrace
 ~~~
@@ -59,16 +59,22 @@ To access the underlying functions employed by the GUI, import them from HydroTr
 ~~~
 >>>from HydroTrace.hydro_trace_common import *
 ~~~
-where * is one or more of the following:
+where * is one or more of the following, described below:
+
+* read_cs_file
+* read_pico_csv
+* interp_datetime
+* calc_total
+* calc_desorbtion_rate
 
 Function | Description
 ---  |---
-`read_cs_file(fname)` | *Parameters*: full path and file name to the Chem Station file formatted in the same way as provided in the exampledata. *Returns*: `int_run`: numpy array, `area`: numpy array, `dt` list of datetime objects. While `dt` is a datetime array of all injection times, `int_run` provides an index of these where there `area` could be measured. All are returned as `None` if unsuccessful.
-`read_pico_csv(fname)` | *Parameters*: full path and file name to the temperature record formatted in the same way as provided in the exampledata. *Returns*: `temp`: numpy array, `dt`: list of datetime objects. `dt` is a datetime array of all temperature measurement points, `temp` is the temperature at these datetimes, both are returned as `None` if unsuccessful.
-`interp_datetime(dt0,d0,dt1)` | *Parameters*: `dt0` and `d0` are incoming list of datetime objects and values, respectively. `dtl` is a list of datetimes within the range captured by `dt0`. *Returns*: `fdtl`: numpy array, `dtl_mdates`: numpy array. `fdtl` is interpolated values corresponding to input datetimes `dt1`, `dtl_mdates` is an array of matplotlib mdate values corresponding to `dtl` for plotting purposes.
-`calc_total(hsc,std_pa,w,cgas,frate,ctime,area)` | *Parameters*: H std content in ppm (`hsc`), H std peak area (`std_pa`), weight in g (`w`), carrier gas µmol/s (`cgas`), flow rate in mL/min (`frate`), cycle time in min (`ctime`) - all float values and area (numpy array from `read_cs_file`). *Returns*: `content` as float.
-`calc_desorbtion_rate(hsc,std_pa,w,cgas,frate,area)` | *Parameters*: H std content in ppm (`hsc`), H std peak area (`std_pa`), weight in g (`w`), carrier gas µmol/s (`cgas`), flow rate in mL/min (`frate`), - all float values and area (numpy array from `read_cs_file`). *Returns*: `rates` as numpy array.
+`int_run, area, dt = read_cs_file(fname)` | *Parameters*: full path and file name to the Chem Station file formatted in the same way as provided in the exampledata. <br>*Returns*: `int_run`: numpy array, `area`: numpy array, `dt` list of datetime objects. While `dt` is a datetime array of all injection times, `int_run` provides an index of these where there `area` could be measured. All are returned as `None` if unsuccessful.
+`temp, dt = read_pico_csv(fname)` | *Parameters*: full path and file name to the temperature record formatted in the same way as provided in the exampledata.<br> *Returns*: `temp`: numpy array, `dt`: list of datetime objects. `dt` is a datetime array of all temperature measurement points, `temp` is the temperature at these datetimes, both are returned as `None` if unsuccessful.
+`fdtl, dtl_mdates = interp_datetime(dt0,d0,dt1)` | *Parameters*: `dt0` and `d0` are incoming list of datetime objects and values, respectively. `dtl` is a list of datetimes within the range captured by `dt0`.<br> *Returns*: `fdtl`: numpy array, `dtl_mdates`: numpy array. `fdtl` is interpolated values corresponding to input datetimes `dt1`, `dtl_mdates` is an array of matplotlib mdate values corresponding to `dtl` for plotting purposes.
+`content = calc_total(hsc,std_pa,w,cgas,frate,ctime,area)` | *Parameters*: H std content in ppm (`hsc`), H std peak area (`std_pa`), weight in g (`w`), carrier gas µmol/s (`cgas`), flow rate in mL/min (`frate`), cycle time in min (`ctime`) - all float values and area (numpy array from `read_cs_file`).<br> *Returns*: `content` as float.
+`rates = calc_desorbtion_rate(hsc,std_pa,w,cgas,frate,area)` | *Parameters*: H std content in ppm (`hsc`), H std peak area (`std_pa`), weight in g (`w`), carrier gas µmol/s (`cgas`), flow rate in mL/min (`frate`), - all float values and area (numpy array from `read_cs_file`).<br>*Returns*: `rates` as numpy array.
 
 # Further information
 
-This application has been developed in support of activities conducted at the Royce Institute at the University of Manchester. Please see LICENSE for further details.
+This application has been developed in support of activities conducted at the University of Manchester made available by the Henry Royce Institute. Please see LICENSE for further details.
